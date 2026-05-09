@@ -2,9 +2,11 @@ package routes
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/KeviinMoralees/crud-products/pkg/domains/product"
 	"github.com/KeviinMoralees/crud-products/pkg/services/rest/handlers"
+	"github.com/KeviinMoralees/crud-products/pkg/services/rest/middleware"
 )
 
 type Handler struct {
@@ -26,6 +28,9 @@ func (h *Handler) Run(addr string) {
 }
 
 func (h *Handler) registerRoutes() {
+	h.router.Use(middleware.PrometheusMiddleware())
+	h.router.GET("/metrics", gin.WrapH(promhttp.Handler()))
+
 	api := h.router.Group("/api/productos")
 	api.POST("", handlers.CreateProduct(h.service))
 	api.GET("", handlers.GetAllProducts(h.service))
